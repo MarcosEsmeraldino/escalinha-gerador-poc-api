@@ -1,0 +1,10 @@
+server.port: 8080
+
+spring:
+  main.banner-mode: "off"
+  application:
+    group: escalinha
+    name: escalinha-gerador-poc-api
+
+logging.level:
+  root: INFO
