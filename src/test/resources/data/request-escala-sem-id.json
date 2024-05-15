@@ -1,0 +1,27 @@
+{
+  "grupos": [
+    {
+      "id": "06ba8bf3-257c-4e5b-9ed0-b087ca8eb5da",
+      "tamanho": 2
+    },
+    {
+      "id": "ed1319cb-7f51-42f8-9f2e-2e72f4b6f9d7",
+      "tamanho": 2
+    },
+    {
+      "id": "7f7b6104-026f-418a-b80f-735f123ef5d7",
+      "tamanho": 2
+    }
+  ],
+  "candidatos": [
+    {
+      "id": "733cbec3-5f89-41e3-83c4-3bab2bafd18e"
+    },
+    {
+      "id": "48d3f9b4-2cbc-42cf-9216-bc1e16a44eea"
+    },
+    {
+      "id": "4fe33e17-4007-4add-b770-f57222ef5923"
+    }
+  ]
+}
