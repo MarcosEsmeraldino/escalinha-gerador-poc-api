@@ -89,10 +89,10 @@ public class ProcessamentoControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {FILE_REQUEST_ESCALA_INVALIDA, FILE_REQUEST_GRUPO_INVALIDO, FILE_REQUEST_CANDIDATO_INVALIDO})
-    public void retornaErro400AoProcessarEscala(String url) throws Exception {
+    public void retornaErro400AoProcessarEscala(String file) throws Exception {
         var request = post(URL)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(url);
+                .content(readJsonFile(file));
 
         mvc.perform(request)
                 .andExpect(status().isBadRequest());

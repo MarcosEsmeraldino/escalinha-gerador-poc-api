@@ -1,5 +1,6 @@
 package com.escalinha.escalinhageradorpocapi.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -13,10 +14,10 @@ public record EscalaDTO(
 
         @NotEmpty
         @Size(min = 1)
-        List<GrupoDTO> grupos,
+        List<@Valid GrupoDTO> grupos,
 
         @NotEmpty
         @Size(min = 2)
-        List<CandidatoDTO> candidatos
+        List<@Valid CandidatoDTO> candidatos
 ) {
 }
