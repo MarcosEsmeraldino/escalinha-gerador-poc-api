@@ -1,6 +1,7 @@
 package com.escalinha.escalinhageradorpocapi.controller;
 
 import com.escalinha.escalinhageradorpocapi.dto.*;
+import com.escalinha.escalinhageradorpocapi.exception.NaoProcessadoException;
 import com.escalinha.escalinhageradorpocapi.service.ProcessamentoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -98,6 +99,23 @@ public class ProcessamentoControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(service, never())
+                .processar(any(), any());
+    }
+
+    @Test
+    public void retornaErro422AoProcessarEscalaNaoProcessavel() throws Exception {
+
+        when(service.processar(any(), any()))
+                .thenThrow(new NaoProcessadoException("ESCALA NAO PROCESSADA"));
+
+        var request = post(URL)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(readJsonFile(FILE_REQUEST_ESCALA));
+
+        mvc.perform(request)
+                .andExpect(status().isUnprocessableEntity());
+
+        verify(service)
                 .processar(any(), any());
     }
 
