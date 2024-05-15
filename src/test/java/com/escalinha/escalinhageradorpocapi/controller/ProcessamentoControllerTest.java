@@ -2,6 +2,9 @@ package com.escalinha.escalinhageradorpocapi.controller;
 
 import com.escalinha.escalinhageradorpocapi.dto.*;
 import com.escalinha.escalinhageradorpocapi.service.ProcessamentoService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -13,9 +16,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,13 +34,13 @@ public class ProcessamentoControllerTest {
 
     private static final String URL = "/v1/processamentos";
     private static final String URL_LIMITE = "/v1/processamentos?limite=5";
-    private static final String URL_LIMITE_MENOR_QUE_1 = "/v1/processamentos?limite=0";
-    private static final String FILE_REQUEST = "src/test/resources/data/request-escala.json";
-    private static final String FILE_REQUEST_SEM_ID = "src/test/resources/data/request-escala-sem-id.json";
-    private static final String FILE_REQUEST_SEM_GRUPOS = "src/test/resources/data/request-escala-sem-grupos.json";
-    private static final String FILE_REQUEST_SEM_CANDIDATOS = "src/test/resources/data/request-escala-sem-candidatos.json";
-    private static final String FILE_REQUEST_GRUPO_SEM_ID = "src/test/resources/data/request-escala-com-grupo-sem-id.json";
-    private static final String FILE_REQUEST_CANDIDATO_SEM_ID = "src/test/resources/data/request-escala-com-candidato-sem-id.json";
+    private static final String URL_LIMITE_INVALIDO = "/v1/processamentos?limite=0";
+    private static final String FILE_REQUEST_ESCALA = "data/request-escala.json";
+    private static final String FILE_REQUEST_ESCALA_INVALIDA = "data/request-escala-invalida.json";
+    private static final String FILE_REQUEST_GRUPO_INVALIDO = "data/request-grupo-invalido.json";
+    private static final String FILE_REQUEST_CANDIDATO_INVALIDO = "data/request-candidato-invalido.json";
+
+    private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Autowired
     private MockMvc mvc;
@@ -58,11 +60,11 @@ public class ProcessamentoControllerTest {
     @ValueSource(strings = {URL, URL_LIMITE})
     public void retornaSucesso200AoProcessarEscala(String url) throws Exception {
         when(service.processar(any(), any()))
-                .thenReturn(List.of(new EscalaPreenchida(null, null, null)));
+                .thenReturn(List.of(new EscalaPreenchidaDTO(null, null, null)));
 
         var request = post(url)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(getRequest(FILE_REQUEST));
+                .content(readJsonFile(FILE_REQUEST_ESCALA));
 
         mvc.perform(request)
                 .andExpect(status().isOk())
@@ -74,9 +76,9 @@ public class ProcessamentoControllerTest {
 
     @Test
     public void retornaErro400AoProcessarEscalaComLimiteMenorQue1() throws Exception {
-        var request = post(URL_LIMITE_MENOR_QUE_1)
+        var request = post(URL_LIMITE_INVALIDO)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(getRequest(FILE_REQUEST));
+                .content(readJsonFile(FILE_REQUEST_ESCALA));
 
         mvc.perform(request)
                 .andExpect(status().isBadRequest());
@@ -86,8 +88,7 @@ public class ProcessamentoControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {FILE_REQUEST_SEM_ID, FILE_REQUEST_SEM_GRUPOS, FILE_REQUEST_SEM_GRUPOS, FILE_REQUEST_SEM_CANDIDATOS,
-            FILE_REQUEST_GRUPO_SEM_ID, FILE_REQUEST_CANDIDATO_SEM_ID})
+    @ValueSource(strings = {FILE_REQUEST_ESCALA_INVALIDA, FILE_REQUEST_GRUPO_INVALIDO, FILE_REQUEST_CANDIDATO_INVALIDO})
     public void retornaErro400AoProcessarEscala(String url) throws Exception {
         var request = post(URL)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -100,7 +101,10 @@ public class ProcessamentoControllerTest {
                 .processar(any(), any());
     }
 
-    private String getRequest(String file) throws IOException {
-        return new String(Files.readAllBytes(Paths.get(file)));
+    private String readJsonFile(String filePath) throws IOException {
+        var classLoader = getClass().getClassLoader();
+        var file = new File(classLoader.getResource(filePath).getFile());
+        var jsonNode = MAPPER.readValue(file, ObjectNode.class);
+        return jsonNode.toString();
     }
 }

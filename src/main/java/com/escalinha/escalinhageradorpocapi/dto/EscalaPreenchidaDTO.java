@@ -2,9 +2,9 @@ package com.escalinha.escalinhageradorpocapi.dto;
 
 import java.util.List;
 
-public record EscalaPreenchida(
+public record EscalaPreenchidaDTO(
         String id,
-        List<GrupoPreenchido> grupos,
+        List<GrupoPreenchidoDTO> grupos,
         Integer sore
 ) {
 }

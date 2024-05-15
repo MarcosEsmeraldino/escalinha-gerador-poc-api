@@ -2,8 +2,8 @@ package com.escalinha.escalinhageradorpocapi.dto;
 
 import java.util.List;
 
-public record GrupoPreenchido(
+public record GrupoPreenchidoDTO(
         String id,
-        List<Candidato> candidatos
+        List<CandidatoDTO> candidatos
 ) {
 }
