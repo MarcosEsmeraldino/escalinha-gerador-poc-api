@@ -31,11 +31,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ProcessamentoControllerTest {
+public class CombinacaoControllerTest {
 
-    private static final String URL = "/v1/processamentos";
-    private static final String URL_LIMITE = "/v1/processamentos?limite=5";
-    private static final String URL_LIMITE_INVALIDO = "/v1/processamentos?limite=0";
+    private static final String URL = "/v1/combinacoes";
+    private static final String URL_LIMITE = "/v1/combinacoes";
+    private static final String URL_LIMITE_INVALIDO = "/v1/combinacoes";
     private static final String FILE_REQUEST_ESCALA = "data/request-escala.json";
     private static final String FILE_REQUEST_ESCALA_INVALIDA = "data/request-escala-invalida.json";
     private static final String FILE_REQUEST_GRUPO_INVALIDO = "data/request-grupo-invalido.json";
@@ -47,7 +47,7 @@ public class ProcessamentoControllerTest {
     private MockMvc mvc;
 
     @Autowired
-    private ProcessamentoController controller;
+    private CombinacaoController controller;
 
     @MockBean
     private ProcessamentoService service;
@@ -59,9 +59,9 @@ public class ProcessamentoControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {URL, URL_LIMITE})
-    public void retornaSucesso200AoProcessarEscala(String url) throws Exception {
-        when(service.processar(any(), any()))
-                .thenReturn(List.of(new EscalaPreenchidaDTO(null, null, null)));
+    public void retornaSucesso200AoCombinarEscala(String url) throws Exception {
+        when(service.processar(any()))
+                .thenReturn(List.of(new CombinacaoResponse(null, null)));
 
         var request = post(url)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -72,25 +72,12 @@ public class ProcessamentoControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE));
 
         verify(service)
-                .processar(any(), any());
-    }
-
-    @Test
-    public void retornaErro400AoProcessarEscalaComLimiteMenorQue1() throws Exception {
-        var request = post(URL_LIMITE_INVALIDO)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(readJsonFile(FILE_REQUEST_ESCALA));
-
-        mvc.perform(request)
-                .andExpect(status().isBadRequest());
-
-        verify(service, never())
-                .processar(any(), any());
+                .processar(any());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {FILE_REQUEST_ESCALA_INVALIDA, FILE_REQUEST_GRUPO_INVALIDO, FILE_REQUEST_CANDIDATO_INVALIDO})
-    public void retornaErro400AoProcessarEscala(String file) throws Exception {
+    public void retornaErro400AoCombinarEscala(String file) throws Exception {
         var request = post(URL)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(readJsonFile(file));
@@ -99,13 +86,13 @@ public class ProcessamentoControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(service, never())
-                .processar(any(), any());
+                .processar(any());
     }
 
     @Test
-    public void retornaErro422AoProcessarEscalaNaoProcessavel() throws Exception {
+    public void retornaErro422AoCombinarEscalaNaoProcessavel() throws Exception {
 
-        when(service.processar(any(), any()))
+        when(service.processar(any()))
                 .thenThrow(new NaoProcessadoException("ESCALA NAO PROCESSADA"));
 
         var request = post(URL)
@@ -116,7 +103,7 @@ public class ProcessamentoControllerTest {
                 .andExpect(status().isUnprocessableEntity());
 
         verify(service)
-                .processar(any(), any());
+                .processar(any());
     }
 
     private String readJsonFile(String filePath) throws IOException {

@@ -1,6 +1,5 @@
 {
-  "id": "7e8df448-03ad-40c6-b5df-a38326483cb4",
-  "grupos": [
+  "posicoes": [
     {
       "id": "06ba8bf3-257c-4e5b-9ed0-b087ca8eb5da",
       "tamanho": 2
@@ -14,7 +13,7 @@
       "tamanho": 2
     }
   ],
-  "candidatos": [
+  "elementos": [
     {
       "id": "733cbec3-5f89-41e3-83c4-3bab2bafd18e"
     },
