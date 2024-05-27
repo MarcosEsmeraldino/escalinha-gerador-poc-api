@@ -2,7 +2,7 @@ package com.escalinha.escalinhageradorpocapi.controller;
 
 import com.escalinha.escalinhageradorpocapi.dto.CombinacaoRequest;
 import com.escalinha.escalinhageradorpocapi.dto.CombinacaoResponse;
-import com.escalinha.escalinhageradorpocapi.service.ProcessamentoService;
+import com.escalinha.escalinhageradorpocapi.service.CombinacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,7 +17,7 @@ import java.util.List;
 public class CombinacaoController {
 
     @Autowired
-    private ProcessamentoService service;
+    private CombinacaoService service;
 
     @PostMapping
     @Operation(summary = "Gera as combinações dos elementos e retorna os melhores resultados")
@@ -26,6 +26,6 @@ public class CombinacaoController {
             @RequestBody
             CombinacaoRequest escala) {
 
-        return service.processar(escala);
+        return service.combinar(escala);
     }
 }

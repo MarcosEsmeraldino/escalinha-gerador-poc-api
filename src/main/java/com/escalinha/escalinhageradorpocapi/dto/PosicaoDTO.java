@@ -1,8 +1,8 @@
 package com.escalinha.escalinhageradorpocapi.dto;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public record PosicaoDTO(
 
@@ -10,7 +10,7 @@ public record PosicaoDTO(
         String id,
 
         @NotNull
-        @Min(1)
+        @Positive
         Integer tamanho
 ) {
 }

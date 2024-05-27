@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @Slf4j
 @ControllerAdvice
-public class EscalinhaExceptionHandler {
+public class CombinacaoExceptionHandler {
 
-    @ExceptionHandler(NaoProcessadoException.class)
-    public ResponseEntity<Object> handlerException(NaoProcessadoException ex) {
+    @ExceptionHandler(CombinacaoException.class)
+    public ResponseEntity<Object> handlerException(CombinacaoException ex) {
         log.error(ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)

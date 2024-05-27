@@ -1,8 +1,8 @@
 package com.escalinha.escalinhageradorpocapi.controller;
 
 import com.escalinha.escalinhageradorpocapi.dto.*;
-import com.escalinha.escalinhageradorpocapi.exception.NaoProcessadoException;
-import com.escalinha.escalinhageradorpocapi.service.ProcessamentoService;
+import com.escalinha.escalinhageradorpocapi.exception.CombinacaoValidationException;
+import com.escalinha.escalinhageradorpocapi.service.CombinacaoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -35,7 +35,6 @@ public class CombinacaoControllerTest {
 
     private static final String URL = "/v1/combinacoes";
     private static final String URL_LIMITE = "/v1/combinacoes";
-    private static final String URL_LIMITE_INVALIDO = "/v1/combinacoes";
     private static final String FILE_REQUEST_ESCALA = "data/request-escala.json";
     private static final String FILE_REQUEST_ESCALA_INVALIDA = "data/request-escala-invalida.json";
     private static final String FILE_REQUEST_GRUPO_INVALIDO = "data/request-grupo-invalido.json";
@@ -50,7 +49,7 @@ public class CombinacaoControllerTest {
     private CombinacaoController controller;
 
     @MockBean
-    private ProcessamentoService service;
+    private CombinacaoService service;
 
     @Test
     void contextLoads() throws Exception {
@@ -59,8 +58,8 @@ public class CombinacaoControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {URL, URL_LIMITE})
-    public void retornaSucesso200AoCombinarEscala(String url) throws Exception {
-        when(service.processar(any()))
+    public void retornaSucesso200AoCombinar(String url) throws Exception {
+        when(service.combinar(any()))
                 .thenReturn(List.of(new CombinacaoResponse(null, null)));
 
         var request = post(url)
@@ -72,12 +71,12 @@ public class CombinacaoControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE));
 
         verify(service)
-                .processar(any());
+                .combinar(any());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {FILE_REQUEST_ESCALA_INVALIDA, FILE_REQUEST_GRUPO_INVALIDO, FILE_REQUEST_CANDIDATO_INVALIDO})
-    public void retornaErro400AoCombinarEscala(String file) throws Exception {
+    public void retornaErro400AoCombinar(String file) throws Exception {
         var request = post(URL)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(readJsonFile(file));
@@ -86,14 +85,14 @@ public class CombinacaoControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(service, never())
-                .processar(any());
+                .combinar(any());
     }
 
     @Test
-    public void retornaErro422AoCombinarEscalaNaoProcessavel() throws Exception {
+    public void retornaErro422AoCombinarComErroNegocio() throws Exception {
 
-        when(service.processar(any()))
-                .thenThrow(new NaoProcessadoException("ESCALA NAO PROCESSADA"));
+        when(service.combinar(any()))
+                .thenThrow(new CombinacaoValidationException());
 
         var request = post(URL)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -103,7 +102,7 @@ public class CombinacaoControllerTest {
                 .andExpect(status().isUnprocessableEntity());
 
         verify(service)
-                .processar(any());
+                .combinar(any());
     }
 
     private String readJsonFile(String filePath) throws IOException {
