@@ -1,9 +1,13 @@
 package com.escalinha.escalinhageradorpocapi.dto;
 
+import lombok.Builder;
+import lombok.Data;
+
 import java.util.List;
 
-public record CombinacaoResponse(
-        List<List<ElementoDTO>> combinacao,
-        Integer sore
-) {
+@Data
+@Builder
+public class CombinacaoResponse {
+    private List<List<ElementoDTO>> combinacao;
+    private Double score;
 }

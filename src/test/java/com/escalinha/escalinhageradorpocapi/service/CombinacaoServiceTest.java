@@ -34,6 +34,7 @@ public class CombinacaoServiceTest {
 
         var response = service.combinar(getRequest());
 
+        response.forEach(System.out::println);
         assertNotNull(response);
         assertEquals(27, response.size());
     }
