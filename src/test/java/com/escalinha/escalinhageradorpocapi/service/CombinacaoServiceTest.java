@@ -35,7 +35,7 @@ public class CombinacaoServiceTest {
         var response = service.combinar(getRequest());
 
         assertNotNull(response);
-        assertEquals(1, response.size());
+        assertEquals(27, response.size());
     }
 
     private CombinacaoRequest getRequest() {
@@ -43,16 +43,18 @@ public class CombinacaoServiceTest {
     }
 
     private List<PosicaoDTO> getPosicoes() {
-        var g1 = new PosicaoDTO("POSICAO-1", 2);
-        var g2 = new PosicaoDTO("POSICAO-2", 2);
-        var g3 = new PosicaoDTO("POSICAO-3", 2);
-        return List.of(g1, g2, g3);
+        return List.of(
+                new PosicaoDTO("P-1", 2),
+                new PosicaoDTO("P-2", 2),
+                new PosicaoDTO("P-3", 2)
+        );
     }
 
     private List<ElementoDTO> getElementos() {
-        var c1 = new ElementoDTO("ELEMENTO-1");
-        var c2 = new ElementoDTO("ELEMENTO-2");
-        var c3 = new ElementoDTO("ELEMENTO-3");
-        return List.of(c1, c2, c3);
+        return List.of(
+                new ElementoDTO("E-1"),
+                new ElementoDTO("E-2"),
+                new ElementoDTO("E-3")
+        );
     }
 }

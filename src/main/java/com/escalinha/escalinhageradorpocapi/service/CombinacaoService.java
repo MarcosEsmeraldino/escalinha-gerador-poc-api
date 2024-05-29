@@ -1,7 +1,6 @@
 package com.escalinha.escalinhageradorpocapi.service;
 
-import com.escalinha.escalinhageradorpocapi.combinator.ElementoCombinator;
-import com.escalinha.escalinhageradorpocapi.combinator.GrupoCombinator;
+import com.escalinha.escalinhageradorpocapi.combinator.Combinator;
 import com.escalinha.escalinhageradorpocapi.dto.CombinacaoRequest;
 import com.escalinha.escalinhageradorpocapi.dto.CombinacaoResponse;
 import com.escalinha.escalinhageradorpocapi.dto.ElementoDTO;
@@ -40,11 +39,13 @@ public class CombinacaoService {
     }
 
     private List<List<ElementoDTO>> combinarElementos(List<ElementoDTO> grupo, Integer subGrupoSize) {
-        return new ElementoCombinator().combine(grupo, subGrupoSize);
+        // elementos não podem repetir dentro de um grupo
+        return Combinator.combine(grupo, subGrupoSize);
     }
 
     private List<List<List<ElementoDTO>>> combinarGrupos(List<List<ElementoDTO>> grupos, Integer quantidade) {
-        return new GrupoCombinator().combine(grupos, quantidade);
+        // grupos podem repetir dentro de uma combinação
+        return Combinator.combineRepeatable(grupos, quantidade);
     }
 
     private List<CombinacaoResponse> filtrarCombinacoesDesequilibradas(List<CombinacaoResponse> responses) {
