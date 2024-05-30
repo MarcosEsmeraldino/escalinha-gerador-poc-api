@@ -60,7 +60,7 @@ public class CombinacaoControllerTest {
     @ValueSource(strings = {URL, URL_LIMITE})
     public void retornaSucesso200AoCombinar(String url) throws Exception {
         when(service.combinar(any()))
-                .thenReturn(List.of(new CombinacaoResponse(null, null)));
+                .thenReturn(List.of(CombinacaoResponse.builder().build()));
 
         var request = post(url)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

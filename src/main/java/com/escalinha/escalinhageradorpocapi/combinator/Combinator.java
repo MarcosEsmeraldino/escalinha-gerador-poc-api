@@ -3,10 +3,7 @@ package com.escalinha.escalinhageradorpocapi.combinator;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @UtilityClass
@@ -51,4 +48,40 @@ public class Combinator {
             combinacaoAtual.remove(combinacaoAtual.size() - 1);
         }
     }
+
+    /*@SuppressWarnings("unchecked")
+    public static <T> T[][] combineRepeatable(T[] elementos, int tamanho) {
+        if (tamanho <= 0) {
+            // Retorna um array vazio de arrays vazios
+            return (T[][]) Array.newInstance(elementos.getClass(), 1);
+        }
+
+        // List to hold the results
+        List<T[]> resultList = new ArrayList<>();
+
+        // Temporary array to hold each combination
+        T[] combinacaoAtual = (T[]) Array.newInstance(elementos.getClass().getComponentType(), tamanho);
+
+        // Generate combinations
+        gerarCombinacoesRecursivo(elementos, tamanho, 0, combinacaoAtual, resultList);
+
+        // Convert list to array
+        T[][] resultArray = (T[][]) Array.newInstance(elementos.getClass().getComponentType(), resultList.size(), tamanho);
+        for (int i = 0; i < resultList.size(); i++) {
+            resultArray[i] = resultList.get(i);
+        }
+
+        return resultArray;
+    }
+
+    private static <T> void gerarCombinacoesRecursivo(T[] elementos, int tamanho, int pos, T[] combinacaoAtual, List<T[]> result) {
+        if (pos == tamanho) {
+            result.add(combinacaoAtual.clone());
+            return;
+        }
+        for (T elemento : elementos) {
+            combinacaoAtual[pos] = elemento;
+            gerarCombinacoesRecursivo(elementos, tamanho, pos + 1, combinacaoAtual, result);
+        }
+    }*/
 }
