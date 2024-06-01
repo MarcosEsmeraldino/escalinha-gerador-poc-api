@@ -49,39 +49,40 @@ public class Combinator {
         }
     }
 
-    /*@SuppressWarnings("unchecked")
-    public static <T> T[][] combineRepeatable(T[] elementos, int tamanho) {
-        if (tamanho <= 0) {
-            // Retorna um array vazio de arrays vazios
-            return (T[][]) Array.newInstance(elementos.getClass(), 1);
+    /**
+     * Combinação de elementos com repetição usando abordagem iterativa
+     * com suporte a paginação.
+     */
+    public static <T> List<List<T>> combineRepeatable(List<T> elementos, int tamanho, int offset, int limit) {
+        List<List<T>> result = new ArrayList<>();
+        int[] indices = new int[tamanho];
+        Arrays.fill(indices, 0);
+
+        int count = 0;
+        while (indices[0] < elementos.size()) {
+            if (count >= offset && result.size() < limit) {
+                List<T> combination = new ArrayList<>();
+                for (int index : indices) {
+                    combination.add(elementos.get(index));
+                }
+                result.add(combination);
+            }
+
+            // Increment the indices
+            int i = tamanho - 1;
+            while (i >= 0 && indices[i] == elementos.size() - 1) {
+                i--;
+            }
+            if (i < 0) break;
+
+            indices[i]++;
+            for (int j = i + 1; j < tamanho; j++) {
+                indices[j] = 0;
+            }
+
+            count++;
         }
 
-        // List to hold the results
-        List<T[]> resultList = new ArrayList<>();
-
-        // Temporary array to hold each combination
-        T[] combinacaoAtual = (T[]) Array.newInstance(elementos.getClass().getComponentType(), tamanho);
-
-        // Generate combinations
-        gerarCombinacoesRecursivo(elementos, tamanho, 0, combinacaoAtual, resultList);
-
-        // Convert list to array
-        T[][] resultArray = (T[][]) Array.newInstance(elementos.getClass().getComponentType(), resultList.size(), tamanho);
-        for (int i = 0; i < resultList.size(); i++) {
-            resultArray[i] = resultList.get(i);
-        }
-
-        return resultArray;
+        return result;
     }
-
-    private static <T> void gerarCombinacoesRecursivo(T[] elementos, int tamanho, int pos, T[] combinacaoAtual, List<T[]> result) {
-        if (pos == tamanho) {
-            result.add(combinacaoAtual.clone());
-            return;
-        }
-        for (T elemento : elementos) {
-            combinacaoAtual[pos] = elemento;
-            gerarCombinacoesRecursivo(elementos, tamanho, pos + 1, combinacaoAtual, result);
-        }
-    }*/
 }

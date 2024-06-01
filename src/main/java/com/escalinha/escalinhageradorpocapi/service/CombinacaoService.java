@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+
 @Slf4j
 @Service
 public class CombinacaoService {
@@ -19,8 +21,23 @@ public class CombinacaoService {
     public List<CombinacaoResponse> combinar(CombinacaoRequest request) {
         CombinacaoValidator.isValid(request);
 
-        var todasCombinacoes = gerarTodasCombinacoes(request);
-        var combinacoesEquilibradas = filtrarEquilibradas(request, todasCombinacoes);
+//        var todasCombinacoes = gerarTodasCombinacoes(request);
+//        var combinacoesEquilibradas = filtrarEquilibradas(request, todasCombinacoes);
+//
+//        return combinacoesEquilibradas;
+
+        var elementos = request.elementos();
+        var tamanhoPosicao = request.posicoes().get(0).tamanho();
+        var elementosCombinados = combinarElementos(elementos, tamanhoPosicao);
+
+        List<CombinacaoResponse> combinacoesEquilibradas = null;
+        int page=0;
+        int size=100000;
+        do {
+            var todasCombinacoes = gerarTodasCombinacoesPaginado(request, elementosCombinados, page, size);
+            combinacoesEquilibradas = filtrarEquilibradas(request, todasCombinacoes);
+            page++;
+        } while(isNull(combinacoesEquilibradas));
 
         return combinacoesEquilibradas;
     }
@@ -30,13 +47,23 @@ public class CombinacaoService {
         var tamanhoPosicao = request.posicoes().get(0).tamanho();
 
         var elementosCombinados = combinarElementos(elementos, tamanhoPosicao);
-        log.info("elementosCombinados: {}, elementos: {}, tamanhoPosicao: {}",
-                elementosCombinados.size(), elementos.size(), tamanhoPosicao);
 
         var quantidadePosicoes = request.posicoes().size();
         var gruposCombinados = combinarGrupos(elementosCombinados, quantidadePosicoes);
-        log.info("gruposCombinados: {}, elementosCombinados: {}, quantidadePosicoes: {}",
-                gruposCombinados.size(), elementosCombinados.size(), quantidadePosicoes);
+
+        return gruposCombinados.stream()
+                .map(gc -> CombinacaoResponse.builder()
+                            .combinacao(gc)
+                            .score(0d)
+                            .build()
+                )
+                .toList();
+    }
+
+    private List<CombinacaoResponse> gerarTodasCombinacoesPaginado(CombinacaoRequest request, List<List<ElementoDTO>> elementosCombinados, int page, int size) {
+        log.info("page: {}, size: {}", page, size);
+        var quantidadePosicoes = request.posicoes().size();
+        var gruposCombinados = combinarGruposPaginado(elementosCombinados, quantidadePosicoes, page, size);
 
         return gruposCombinados.stream()
                 .map(gc -> CombinacaoResponse.builder()
@@ -51,7 +78,6 @@ public class CombinacaoService {
      * Elementos não podem repetir dentro de um grupo
      */
     private List<List<ElementoDTO>> combinarElementos(List<ElementoDTO> grupo, Integer subGrupoSize) {
-        log.info("combinarElementos(grupo: {}, subGrupoSize: {})", grupo.size(), subGrupoSize);
         return Combinator.combine(grupo, subGrupoSize);
     }
 
@@ -59,8 +85,11 @@ public class CombinacaoService {
      * Grupos podem repetir dentro de uma combinação
      */
     private List<List<List<ElementoDTO>>> combinarGrupos(List<List<ElementoDTO>> grupos, Integer quantidade) {
-        log.info("combinarGrupos(grupos: {}, quantidade: {})", grupos.size(), quantidade);
         return Combinator.combineRepeatable(grupos, quantidade);
+    }
+
+    private List<List<List<ElementoDTO>>> combinarGruposPaginado(List<List<ElementoDTO>> grupos, Integer quantidade, int page, int size) {
+        return Combinator.combineRepeatable(grupos, quantidade, page, size);
     }
 
     private List<CombinacaoResponse> filtrarEquilibradas(CombinacaoRequest request, List<CombinacaoResponse> responses) {
