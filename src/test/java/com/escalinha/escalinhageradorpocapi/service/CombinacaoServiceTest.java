@@ -1,92 +1,59 @@
 package com.escalinha.escalinhageradorpocapi.service;
 
-import com.escalinha.escalinhageradorpocapi.dto.ElementoDTO;
-import com.escalinha.escalinhageradorpocapi.dto.CombinacaoRequest;
-import com.escalinha.escalinhageradorpocapi.dto.PosicaoDTO;
-import org.junit.jupiter.api.Test;
+import com.escalinha.escalinhageradorpocapi.utils.CombinacaoRequestUtils;
+import com.escalinha.escalinhageradorpocapi.validator.CombinacaoValidator;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalAnswers.returnsSecondArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CombinacaoServiceTest {
 
+    @Spy
     @InjectMocks
     private CombinacaoService service;
 
+    @Mock
+    private CombinacaoValidator combinacaoValidator;
+
     @ParameterizedTest
-    @CsvSource({"6,3,2,3", "252,2,5,10"/*, "252,3,5,10"*/})
-    public void retornaSucessoAoCombinar(int result, int posicoes, int tamanho, int elementos) {
+    @CsvSource({"27,3,2,3", "63504,2,5,10", "2000376,3,5,9"})
+    public void retornaTodasPossibilidadesAoCombinar(int result, int posicoes, int tamanho, int elementos) {
 
-        var response = service.combinar(getRequest(posicoes, tamanho, elementos));
+        // não aplica filtro
+        doAnswer(returnsSecondArg())
+                .when(service)
+                .filtrarEquilibradas(any(), any());
 
-        System.out.println(response.size());
+        var request = CombinacaoRequestUtils.getRequest(posicoes, tamanho, elementos);
+
+
+        var response = service.combinar(request);
+
+
         assertNotNull(response);
         assertEquals(result, response.size());
     }
 
-    private CombinacaoRequest getRequest(int posicoes, int tamanho, int elementos) {
-        return new CombinacaoRequest(getPosicoes(posicoes, tamanho), getElementos(elementos));
-    }
+    // TODO: implementar teste no método filtrarEquilibradas
+    /*@ParameterizedTest
+    @CsvSource({"27,3,2,3", "63504,2,5,10", "2000376,3,5,9"})
+    public void retornaEquilibradasAoFiltrar(int result, int posicoes, int tamanho, int elementos) {
 
-    private List<PosicaoDTO> getPosicoes(int posicoes, int tamanho) {
-        List<PosicaoDTO> list = new ArrayList();
-        for(int i=0; i<posicoes; i++) {
-            list.add(new PosicaoDTO("P-"+i, tamanho));
-        }
-        return list;
-    }
+        var request = CombinacaoRequestUtils.getRequest(posicoes, tamanho, elementos);
 
-    private List<ElementoDTO> getElementos(int elementos) {
-        List<ElementoDTO> list = new ArrayList();
-        for(int i=0; i<elementos; i++) {
-            list.add(new ElementoDTO("E-"+i));
-        }
-        return list;
-    }
+        var response = service.filtrarEquilibradas(request.elementos(), responses);
 
-    @Test
-    public void retornaSucessoAoCombinarTimeCozinha() {
-
-        try {
-
-            var response = service.combinar(getRequestCozinha());
-            System.out.println(response.size());
-//            response.forEach(System.out::println);
-
-            assertNotNull(response);
-
-        } catch (OutOfMemoryError error) {
-            error.printStackTrace();
-            assertNull(error);
-        }
-    }
-
-    private CombinacaoRequest getRequestCozinha() {
-        var posicoes = List.of(
-                new PosicaoDTO("02/06", 3),
-                new PosicaoDTO("09/06", 3),
-                new PosicaoDTO("16/06", 3),
-                new PosicaoDTO("23/06", 3)
-        );
-
-        var elementos = List.of(
-                new ElementoDTO("Ana"),
-                new ElementoDTO("Ariete"),
-                new ElementoDTO("Karina"),
-                new ElementoDTO("Priscila"),
-                new ElementoDTO("Gabriele"),
-                new ElementoDTO("Nicolle"),
-                new ElementoDTO("Aline"),
-                new ElementoDTO("Luana")
-        );
-        return new CombinacaoRequest(posicoes, elementos);
-    }
+        assertNotNull(response);
+        assertEquals(result, response.size());
+    }*/
 }

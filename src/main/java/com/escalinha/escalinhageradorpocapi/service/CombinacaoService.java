@@ -6,107 +6,87 @@ import com.escalinha.escalinhageradorpocapi.dto.CombinacaoRequest;
 import com.escalinha.escalinhageradorpocapi.dto.CombinacaoResponse;
 import com.escalinha.escalinhageradorpocapi.dto.ElementoDTO;
 import com.escalinha.escalinhageradorpocapi.validator.CombinacaoValidator;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
-
 @Slf4j
 @Service
 public class CombinacaoService {
 
+    @Autowired
+    private CombinacaoValidator combinacaoValidator;
+
     public List<CombinacaoResponse> combinar(CombinacaoRequest request) {
-        CombinacaoValidator.isValid(request);
+        combinacaoValidator.isValid(request);
+        var pageRequest = PageRequest.of(0, 1000000);
+        return combinar(request, pageRequest);
+    }
 
-//        var todasCombinacoes = gerarTodasCombinacoes(request);
-//        var combinacoesEquilibradas = filtrarEquilibradas(request, todasCombinacoes);
-//
-//        return combinacoesEquilibradas;
-
+    private List<CombinacaoResponse> combinar(CombinacaoRequest request, PageRequest pageRequest) {
         var elementos = request.elementos();
         var tamanhoPosicao = request.posicoes().get(0).tamanho();
-        var elementosCombinados = combinarElementos(elementos, tamanhoPosicao);
+        var elementosCombinados = Combinator.combine(elementos, tamanhoPosicao);
 
-        List<CombinacaoResponse> combinacoesEquilibradas = null;
-        int page=0;
-        int size=100000;
-        do {
-            var todasCombinacoes = gerarTodasCombinacoesPaginado(request, elementosCombinados, page, size);
-            combinacoesEquilibradas = filtrarEquilibradas(request, todasCombinacoes);
-            page++;
-        } while(isNull(combinacoesEquilibradas));
+        List<CombinacaoResponse> listaCombinacoes = new ArrayList<>();
+        while (true) {
 
-        return combinacoesEquilibradas;
+            var combinacoesPaginadas = gerarCombinacoesPaginado(request, elementosCombinados, pageRequest);
+
+            var combinacoesFiltradas = filtrarEquilibradas(elementos, combinacoesPaginadas.getContent());
+
+            if(!combinacoesFiltradas.isEmpty()) {
+                listaCombinacoes.addAll(combinacoesFiltradas);
+            }
+
+
+            if (combinacoesPaginadas.isLast()) {
+                break;
+            }
+
+            pageRequest = pageRequest.next();
+        }
+
+        return listaCombinacoes;
     }
 
-    private List<CombinacaoResponse> gerarTodasCombinacoes(CombinacaoRequest request) {
-        var elementos = request.elementos();
-        var tamanhoPosicao = request.posicoes().get(0).tamanho();
-
-        var elementosCombinados = combinarElementos(elementos, tamanhoPosicao);
-
+    private Page<CombinacaoResponse> gerarCombinacoesPaginado(CombinacaoRequest request, List<List<ElementoDTO>> elementosCombinados, Pageable pageable) {
         var quantidadePosicoes = request.posicoes().size();
-        var gruposCombinados = combinarGrupos(elementosCombinados, quantidadePosicoes);
 
-        return gruposCombinados.stream()
+        // Calcule o número total de combinações possíveis
+        int totalCombinations = Combinator.countCombineRepeatable(elementosCombinados, quantidadePosicoes);
+
+        var pageSize = (pageable.getOffset() + pageable.getPageSize()) > totalCombinations
+                ? (int) Math.abs(totalCombinations - pageable.getOffset())
+                : pageable.getPageSize();
+
+        var gruposCombinados = Combinator.combineRepeatablePaginated(elementosCombinados, quantidadePosicoes, pageable.getPageNumber(), pageSize);
+
+        var gruposCombinadosList = gruposCombinados.stream()
                 .map(gc -> CombinacaoResponse.builder()
-                            .combinacao(gc)
-                            .score(0d)
-                            .build()
+                        .combinacao(gc)
+                        .score(0d)
+                        .build()
                 )
                 .toList();
+
+        return new PageImpl<CombinacaoResponse>(gruposCombinadosList, pageable, totalCombinations);
     }
 
-    private List<CombinacaoResponse> gerarTodasCombinacoesPaginado(CombinacaoRequest request, List<List<ElementoDTO>> elementosCombinados, int page, int size) {
-        log.info("page: {}, size: {}", page, size);
-        var quantidadePosicoes = request.posicoes().size();
-        var gruposCombinados = combinarGruposPaginado(elementosCombinados, quantidadePosicoes, page, size);
-
-        return gruposCombinados.stream()
-                .map(gc -> CombinacaoResponse.builder()
-                            .combinacao(gc)
-                            .score(0d)
-                            .build()
-                )
-                .toList();
-    }
-
-    /**
-     * Elementos não podem repetir dentro de um grupo
-     */
-    private List<List<ElementoDTO>> combinarElementos(List<ElementoDTO> grupo, Integer subGrupoSize) {
-        return Combinator.combine(grupo, subGrupoSize);
-    }
-
-    /**
-     * Grupos podem repetir dentro de uma combinação
-     */
-    private List<List<List<ElementoDTO>>> combinarGrupos(List<List<ElementoDTO>> grupos, Integer quantidade) {
-        return Combinator.combineRepeatable(grupos, quantidade);
-    }
-
-    private List<List<List<ElementoDTO>>> combinarGruposPaginado(List<List<ElementoDTO>> grupos, Integer quantidade, int page, int size) {
-        return Combinator.combineRepeatable(grupos, quantidade, page, size);
-    }
-
-    private List<CombinacaoResponse> filtrarEquilibradas(CombinacaoRequest request, List<CombinacaoResponse> responses) {
-        var elementos = request.elementos();
-
+    public List<CombinacaoResponse> filtrarEquilibradas(List<ElementoDTO> elementos, List<CombinacaoResponse> responses) {
         // calcula score de cada combinação
         responses.forEach(r -> calcularScore(r, elementos));
 
         // filtra combinações que possuem o melhor score
         return filtrarCombinacoes(responses);
-    }
-
-    private double calcularFatorEquilibrio(CombinacaoRequest request) {
-        var posicoes = request.posicoes().size();
-        var tamanhoPosicao = request.posicoes().get(0).tamanho();
-        var posicoesTotal = posicoes * tamanhoPosicao;
-        return (double) posicoesTotal / request.elementos().size();
     }
 
     private void calcularScore(CombinacaoResponse combinacao, List<ElementoDTO> elementos) {

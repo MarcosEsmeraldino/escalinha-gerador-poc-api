@@ -27,33 +27,17 @@ public class Combinator {
         return combinations;
     }
 
-    /**
-     * Combinação de elementos com repetição
-     */
-    public static <T> List<List<T>> combineRepeatable(List<T> elementos, int tamanho) {
-        List<List<T>> result = new ArrayList<>();
-        gerarCombinacoesRecursivo(elementos, tamanho, new ArrayList<>(), result);
-        return result;
-    }
-
-    private static <T> void gerarCombinacoesRecursivo(List<T>  elementos, int tamanho, List<T> combinacaoAtual, List<List<T>> result) {
-        if (combinacaoAtual.size() == tamanho) {
-            result.add(new ArrayList<>(combinacaoAtual));
-            return;
+    public static <T> long countCombine(int elementos, int tamanho) {
+        if (tamanho > elementos) {
+            return 0;
         }
-
-        for (T elemento : elementos) {
-            combinacaoAtual.add(elemento);
-            gerarCombinacoesRecursivo(elementos, tamanho, combinacaoAtual, result);
-            combinacaoAtual.remove(combinacaoAtual.size() - 1);
-        }
+        return CombinatoricsUtils.factorial(elementos) / (CombinatoricsUtils.factorial(tamanho) * CombinatoricsUtils.factorial(elementos - tamanho));
     }
 
     /**
-     * Combinação de elementos com repetição usando abordagem iterativa
-     * com suporte a paginação.
+     * Combinação de elementos com repetição usando abordagem iterativa com suporte a paginação.
      */
-    public static <T> List<List<T>> combineRepeatable(List<T> elementos, int tamanho, int offset, int limit) {
+    public static <T> List<List<T>> combineRepeatablePaginated(List<T> elementos, int tamanho, int offset, int limit) {
         List<List<T>> result = new ArrayList<>();
         int[] indices = new int[tamanho];
         Arrays.fill(indices, 0);
@@ -84,5 +68,12 @@ public class Combinator {
         }
 
         return result;
+    }
+
+    /**
+     * Contagem de combinações do método combineRepeatablePaginated
+     */
+    public static <T> int countCombineRepeatable(List<T> elementos, int tamanho) {
+        return (int) Math.pow(elementos.size(), tamanho);
     }
 }
