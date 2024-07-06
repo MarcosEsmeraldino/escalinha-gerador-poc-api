@@ -3,30 +3,15 @@ package com.escalinha.escalinhageradorpocapi.utils;
 import com.escalinha.escalinhageradorpocapi.dto.CombinacaoRequest;
 import com.escalinha.escalinhageradorpocapi.dto.ElementoDTO;
 import com.escalinha.escalinhageradorpocapi.dto.PosicaoDTO;
+import lombok.experimental.UtilityClass;
 
-import java.util.ArrayList;
 import java.util.List;
 
+@UtilityClass
 public class CombinacaoRequestUtils {
 
     public static CombinacaoRequest getRequest(int posicoes, int tamanho, int elementos) {
-        return new CombinacaoRequest(getPosicoes(posicoes, tamanho), getElementos(elementos));
-    }
-
-    private static List<PosicaoDTO> getPosicoes(int posicoes, int tamanho) {
-        List<PosicaoDTO> list = new ArrayList();
-        for(int i=0; i<posicoes; i++) {
-            list.add(new PosicaoDTO("P-"+i, tamanho));
-        }
-        return list;
-    }
-
-    private static List<ElementoDTO> getElementos(int elementos) {
-        List<ElementoDTO> list = new ArrayList();
-        for(int i=0; i<elementos; i++) {
-            list.add(new ElementoDTO("E-"+i));
-        }
-        return list;
+        return new CombinacaoRequest(PosicaoUtils.getPosicoes(posicoes, tamanho), ElementoUtils.getElementos(elementos));
     }
 
     private static CombinacaoRequest getRequestCozinha() {

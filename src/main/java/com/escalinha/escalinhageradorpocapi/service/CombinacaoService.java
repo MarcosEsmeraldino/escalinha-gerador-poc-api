@@ -6,7 +6,6 @@ import com.escalinha.escalinhageradorpocapi.dto.CombinacaoRequest;
 import com.escalinha.escalinhageradorpocapi.dto.CombinacaoResponse;
 import com.escalinha.escalinhageradorpocapi.dto.ElementoDTO;
 import com.escalinha.escalinhageradorpocapi.validator.CombinacaoValidator;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
